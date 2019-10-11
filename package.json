@@ -1,9 +1,25 @@
 {
-  "name": "equapro_xlsx",
+  "name": "@equapro/omnis-xlsx",
   "version": "0.0.1",
   "homepage": "https://github.com/equapro/omnis-xlsx",
   "dependencies": {
     "xlsx": "github:equapro/js-xlsx#workaround"
   },
-  "main": "eqp-xlsx.js"
+  "main": "eqp-xlsx.js",
+  "description": "Omnis Studio JavaScript worker module for [SheetJS](https://sheetjs.com).",
+  "scripts": {
+    "test": "echo \"Coming soon\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:equapro/omnis-xlsx.git"
+  },
+  "keywords": [
+    "Omnis Studio",
+    "JavaScript",
+    "SheetJS",
+    "js-xlsx"
+  ],
+  "author": "acucchieri",
+  "license": "MIT"
 }

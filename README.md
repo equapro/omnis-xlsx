@@ -1,2 +1,2 @@
 # omnis-xlsx
-Omnis Studio JavaScript worker module for [js-xlsx](https://sheetjs.com).
+Omnis Studio JavaScript worker module for [SheetJS](https://sheetjs.com).
