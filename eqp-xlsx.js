@@ -1,4 +1,3 @@
-
 const omnis_calls = require('omnis_calls');
 const XLSX = require('xlsx');
 
@@ -8,15 +7,16 @@ const methodMap = {
     /* =================================
      *  Writing Workbooks
      * ================================= */
-	write: function(param) {
+    write: function (param) {
         // parameters
         var filename = param.filename;
         var sheetName = param.sheetName;
         var dateIndexes = param.dateIndexes;
 
+        var data;
         if (dateIndexes.length) {
             // dates parsing
-            var data = param.data.map(function (row) {
+            data = param.data.map(function (row) {
                 // line
                 return row.map((value, index) => {
                     // cell
@@ -28,7 +28,7 @@ const methodMap = {
                 });
             });
         } else {
-            var data = param.data;
+            data = param.data;
         }
 
         // new workbook
@@ -40,26 +40,26 @@ const methodMap = {
         // write file
         XLSX.writeFile(wb, filename);
 
-		// return {
-		// 	'param': param
-		// };
-	}
+        // return {
+        // 	'param': param
+        // };
+    }
 };
 
 
 module.exports = {
-	call: function (method, param, response) { // The only requirement of an Omnis module is that it implement this function.
-		autoSendResponse = true;
+    call: function (method, param, response) { // The only requirement of an Omnis module is that it implement this function.
+        autoSendResponse = true;
 
-		if (methodMap[method]) {
-			const result = methodMap[method](param, response);
-			if (autoSendResponse) {
+        if (methodMap[method]) {
+            const result = methodMap[method](param, response);
+            if (autoSendResponse) {
                 omnis_calls.sendResponse(result, response);
             }
 
-			return true;
-		} else {
-			throw Error("Method '" + method + "' does not exist");
-		}
-	}
+            return true;
+        } else {
+            throw Error("Method '" + method + "' does not exist");
+        }
+    }
 };
