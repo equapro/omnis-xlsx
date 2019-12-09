@@ -10,7 +10,7 @@ const methodMap = {
     write: function (param) {
         // parameters
         var filename = param.filename;
-        var sheetName = param.sheetName;
+        var sheetName = param.sheetName || 'Feuil1';
         var dateIndexes = param.dateIndexes;
 
         var data;
@@ -40,9 +40,9 @@ const methodMap = {
         // write file
         XLSX.writeFile(wb, filename);
 
-        // return {
-        // 	'param': param
-        // };
+        return {
+            'status': true
+        };
     }
 };
 
