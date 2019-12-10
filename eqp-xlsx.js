@@ -43,6 +43,27 @@ const methodMap = {
         return {
             'status': true
         };
+    },
+    /* =================================
+     *  Reading Workbooks
+     * ================================= */
+    read: function (param) {
+        // parameters
+        var filename = param.filename;
+
+        var workbook = XLSX.readFile(filename, {type: 'binary', cellDates: true});
+        var sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        var row = XLSX.utils.sheet_to_json(sheet, {
+            header: 1,
+            raw: false,
+            defval: null
+        });
+
+        return {
+            'status': true,
+            'data': row
+        };
     }
 };
 
