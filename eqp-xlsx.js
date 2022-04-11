@@ -1,5 +1,5 @@
 const omnis_calls = require('omnis_calls');
-const XLSX = require('xlsx');
+var XLSX = require("./vendor/sheetjs/xlsx");
 
 let autoSendResponse = true; // Set to false in methods which should not send a response to Omnis when they exit. (e.g. async methods)
 
