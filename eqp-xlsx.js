@@ -3,6 +3,32 @@ var XLSX = require("./vendor/sheetjs/xlsx");
 
 let autoSendResponse = true; // Set to false in methods which should not send a response to Omnis when they exit. (e.g. async methods)
 
+const PRECISION_CORRECTION = (function() {
+    function getTimezoneOffsetMS(date) {
+        const time = date.getTime();
+        const utcTime = Date.UTC(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
+            date.getHours(),
+            date.getMinutes(),
+            date.getSeconds(),
+            date.getMilliseconds()
+        );
+        return time - utcTime;
+    }
+
+    const basedate = new Date(1899, 11, 30, 0, 0, 0);
+    const dnthreshAsIs = (new Date().getTimezoneOffset() - basedate.getTimezoneOffset()) * 60000;
+    const dnthreshToBe = getTimezoneOffsetMS(new Date()) - getTimezoneOffsetMS(basedate);
+    return dnthreshAsIs - dnthreshToBe;
+})();
+
+function fixSheetJSDate(date) {
+    const timezoneOffset = date.getTimezoneOffset() * 60 * 1000;
+    return new Date(date.getTime() + timezoneOffset + PRECISION_CORRECTION);
+}
+
 const methodMap = {
     /* =================================
      *  Writing Workbooks
@@ -12,6 +38,7 @@ const methodMap = {
         var filename = param.filename;
         var sheetName = param.sheetName || 'Feuil1';
         var dateIndexes = param.dateIndexes;
+        var rowHeader = param.rowHeader;
 
         var data;
         if (dateIndexes.length) {
@@ -20,11 +47,23 @@ const methodMap = {
                 // line
                 return row.map((value, index) => {
                     // cell
-                    if (-1 === dateIndexes.indexOf(index)) {
+                    if (!dateIndexes.includes(index)) {
                         return value;
                     }
 
-                    return new Date(value);
+                    // Valeur vide
+                    if (!value) {
+                        return null;
+                    }
+
+                    // Transformation et validation de la date
+                    let date = new Date(value);
+                    if (!(date instanceof Date)) {
+                        return value;
+                    }
+
+                    // Correction de la Timezone et de l'erreur de précision de la librairie
+                    return fixSheetJSDate(date);
                 });
             });
         } else {
@@ -33,10 +72,26 @@ const methodMap = {
 
         // new workbook
         var wb = XLSX.utils.book_new();
+        
         // new worksheet
-        var ws = XLSX.utils.aoa_to_sheet(data, {cellDates: true});
+        const ws = XLSX.utils.aoa_to_sheet([]);
+        var origin = "A1";
+        
+        // Header
+        if (rowHeader && rowHeader.length > 0) {
+        	XLSX.utils.sheet_add_aoa(ws, rowHeader, { origin: origin });
+        	origin = "A2";
+        }
+        
+        // Data
+        XLSX.utils.sheet_add_aoa(ws, data, {
+            cellDates: true,
+            origin: origin
+        });
+        
         // add worksheet to workbook
         XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        
         // write file
         XLSX.writeFile(wb, filename);
 
@@ -66,7 +121,6 @@ const methodMap = {
         };
     }
 };
-
 
 module.exports = {
     call: function (method, param, response) { // The only requirement of an Omnis module is that it implement this function.
