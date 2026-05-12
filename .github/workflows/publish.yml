@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'
 
+env:
+  # Force les actions JS (checkout, setup-node, etc.) à utiliser Node 24 au lieu de Node 20 (déprécié).
+  # À retirer une fois que Node 24 sera le défaut (2 juin 2026).
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -19,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
       # npm CLI >= 11.5.1 est requis pour l'OIDC Trusted Publishing
