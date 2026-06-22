@@ -1,5 +1,5 @@
 const omnis_calls = require('omnis_calls');
-var XLSX = require("./vendor/sheetjs/xlsx");
+const XLSX = require("./vendor/sheetjs/xlsx");
 
 let autoSendResponse = true; // Set to false in methods which should not send a response to Omnis when they exit. (e.g. async methods)
 
@@ -35,63 +35,56 @@ const methodMap = {
      * ================================= */
     write: function (param) {
         // parameters
-        var filename = param.filename;
-        var sheetName = param.sheetName || 'Feuil1';
-        var dateIndexes = param.dateIndexes;
-        var rowHeader = param.rowHeader;
-
-        var data;
-        if (dateIndexes.length) {
-            // dates parsing
-            data = param.data.map(function (row) {
-                // line
-                return row.map((value, index) => {
-                    // cell
-                    if (!dateIndexes.includes(index)) {
-                        return value;
-                    }
-
-                    // Valeur vide
-                    if (!value) {
-                        return null;
-                    }
-
-                    // Transformation et validation de la date
-                    let date = new Date(value);
-                    if (!(date instanceof Date)) {
-                        return value;
-                    }
-
-                    // Correction de la Timezone et de l'erreur de précision de la librairie
-                    return fixSheetJSDate(date);
-                });
-            });
+        const filename = param.filename;
+        const sheetName = param.sheetName || 'Feuil1';
+        const dateIndexes = Array.isArray(param.dateIndexes) ? param.dateIndexes : [];
+        let rowHeader;
+        if (Array.isArray(param.rowHeader)) {
+            // tableau, pas de cast
+            rowHeader = param.rowHeader;
+        } else if (param.rowHeader && typeof param.rowHeader === 'object') {
+            // objet, cast en tableau
+            rowHeader = Object.values(param.rowHeader);
         } else {
-            data = param.data;
+            // absent (undefined/null)
+            rowHeader = [];
         }
+        if (rowHeader.length && !Array.isArray(rowHeader[0])) {
+            rowHeader = [rowHeader];
+        }
+
+        const data = dateIndexes.length ?
+            param.data.map(row => row.map((value, index) => {
+                if (!dateIndexes.includes(index)) return value;
+                if (!value) return null;
+                const date = new Date(value);
+                if (isNaN(date.getTime())) return value;
+                return fixSheetJSDate(date);
+            })) :
+            param.data;
 
         // new workbook
-        var wb = XLSX.utils.book_new();
-        
+        const wb = XLSX.utils.book_new();
+
         // new worksheet
         const ws = XLSX.utils.aoa_to_sheet([]);
-        var origin = "A1";
-        
+        let origin = "A1";
+
         // Header
-        if (rowHeader && rowHeader.length > 0) {
-        	XLSX.utils.sheet_add_aoa(ws, rowHeader, { origin: origin });
-        	origin = "A2";
+        if (rowHeader.length) {
+            XLSX.utils.sheet_add_aoa(ws, rowHeader, { origin: origin });
+            origin = 'A' + (rowHeader.length + 1);
         }
-        
+
         // Data
         XLSX.utils.sheet_add_aoa(ws, data, {
             cellDates: true,
             origin: origin
         });
-        
+
         // add worksheet to workbook
         XLSX.utils.book_append_sheet(wb, ws, sheetName);
-        
+
         // write file
         XLSX.writeFile(wb, filename);
 
@@ -104,12 +97,12 @@ const methodMap = {
      * ================================= */
     read: function (param) {
         // parameters
-        var filename = param.filename;
+        const filename = param.filename;
 
-        var workbook = XLSX.readFile(filename, {type: 'binary', cellDates: true});
-        var sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const workbook = XLSX.readFile(filename, {type: 'binary', cellDates: true});
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        var row = XLSX.utils.sheet_to_json(sheet, {
+        const row = XLSX.utils.sheet_to_json(sheet, {
             header: 1,
             raw: false,
             defval: null
