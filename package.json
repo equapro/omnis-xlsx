@@ -1,11 +1,12 @@
 {
   "name": "@equapro/omnis-xlsx",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "https://github.com/equapro/omnis-xlsx",
   "main": "eqp-xlsx.js",
   "description": "Omnis Studio JavaScript worker module for [SheetJS](https://sheetjs.com).",
   "scripts": {
-    "test": "echo \"Coming soon\" && exit 0"
+    "lint": "eslint .",
+    "test": "npm run lint"
   },
   "keywords": [
     "Omnis Studio",
@@ -17,6 +18,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/equapro/omnis-xlsx.git"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0"
   },
   "license": "MIT"
 }
