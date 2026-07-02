@@ -5,11 +5,6 @@ on:
     tags:
       - 'v*'
 
-env:
-  # Force les actions JS (checkout, setup-node, etc.) à utiliser Node 24 au lieu de Node 20 (déprécié).
-  # À retirer une fois que Node 24 sera le défaut (2 juin 2026).
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   publish:
     runs-on: ubuntu-latest
